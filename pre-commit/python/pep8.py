@@ -17,6 +17,14 @@ def system(*args, **kwargs):
     return out
 
 
+def skip_check():
+    base_dir = system('git', 'rev-parse', '--show-toplevel').strip()
+    skip_file = os.path.join(base_dir, "skip_pep8")
+    if os.path.exists(skip_file):
+        os.remove(skip_file)
+        return True
+
+
 def get_modified_files():
     modified = re.compile('^(?P<name>.*\.py)$', re.MULTILINE)
     files = system('git', 'diff', '--staged', '--name-only', '--diff-filter=ACMRTUXB')
@@ -24,7 +32,9 @@ def get_modified_files():
 
 
 def main():
-
+    if skip_check():
+        print "* Skipping Pep8 check..."
+        return
     print "* Running Pep8 check..."
     files = get_modified_files()
     tempdir = tempfile.mkdtemp()
